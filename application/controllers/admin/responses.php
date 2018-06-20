@@ -434,7 +434,7 @@ class responses extends Survey_Common_Action
             $defaultSearch['completed']="";
         }
         //add token to top of list if survey is not private
-        if ($bHaveToken) 
+        if ($bHaveToken)
         {
             $column_model[] = array(
                 'name'=>'token',
@@ -575,7 +575,7 @@ class responses extends Survey_Common_Action
                 'hidden' => (bool)$bHidden,
                 'title' => $text,
             );
-            
+
         }
 
         $column_model_txt = ls_json_encode($column_model);
@@ -619,7 +619,7 @@ class responses extends Survey_Common_Action
 
     }
 
-    
+
    /**
     * Returns survey responses in json format for a given survey
     *
@@ -686,7 +686,7 @@ class responses extends Survey_Common_Action
         $oCriteria->order = "{$sOrderBy} {$sOrder}";
         if(Yii::app()->request->getParam('_search'))
         {
-            if(($value=Yii::app()->request->getParam('completed'))) 
+            if(($value=Yii::app()->request->getParam('completed')))
             {
                 if($value=='Y')
                 {
@@ -800,7 +800,7 @@ class responses extends Survey_Common_Action
                         {
                             $aSurveyEntry[] = htmlspecialchars($aFilesInfo[$iFileIndex]['title'],ENT_QUOTES, 'UTF-8');
                             $aSurveyEntry[] = htmlspecialchars($aFilesInfo[$iFileIndex]['comment'],ENT_QUOTES, 'UTF-8');
-                            $aSurveyEntry[] = CHtml::link(rawurldecode($aFilesInfo[$iFileIndex]['name']), $this->getController()->createUrl("/admin/responses",array("sa"=>"actionDownloadfile","surveyid"=>$surveyid,"iResponseId"=>$row['id'],"sFileName"=>$aFilesInfo[$iFileIndex]['name'])) );
+                            $aSurveyEntry[] = CHtml::link(htmlspecialchars(rawurldecode($aFilesInfo[$iFileIndex]['name'])), $this->getController()->createUrl("/admin/responses",array("sa"=>"actionDownloadfile","surveyid"=>$surveyid,"iResponseId"=>$row['id'],"sFileName"=>$aFilesInfo[$iFileIndex]['name'])) );
                             $aSurveyEntry[] = sprintf('%s Mb',round($aFilesInfo[$iFileIndex]['size']/1000,2));
                         }
                         else
@@ -827,8 +827,8 @@ class responses extends Survey_Common_Action
         echo json_encode($aSurveyEntries);
         Yii::app()->end();
     }
-   
-    
+
+
     /**
     * Saves the hidden columns for response browsing in the session
     *
@@ -840,12 +840,12 @@ class responses extends Survey_Common_Action
     {
         if(Permission::model()->hasSurveyPermission($iSurveyId,'responses','read'))
         {
-           $aHiddenFields=explode('|',Yii::app()->request->getPost('aHiddenFields')); 
+           $aHiddenFields=explode('|',Yii::app()->request->getPost('aHiddenFields'));
            $_SESSION['survey_'.$iSurveyId]['HiddenFields']=$aHiddenFields;
         }
     }
-    
-    
+
+
     /**
     * Do an actions on response
     *
@@ -915,9 +915,13 @@ class responses extends Survey_Common_Action
                     $sFileRealName = Yii::app()->getConfig('uploaddir') . "/surveys/" . $iSurveyId . "/files/" . $aFile['filename'];
                     if (file_exists($sFileRealName))
                     {
+                        $mimeType=CFileHelper::getMimeType($sFileRealName, null, false);
+                        if(is_null($mimeType)){
+                            $mimeType="application/octet-stream";
+                        }
                         @ob_clean();
                         header('Content-Description: File Transfer');
-                        header('Content-Type: application/octet-stream');// Find the real type ?
+                        header('Content-Type: '.$mimeType);
                         header('Content-Disposition: attachment; filename="' . rawurldecode($aFile['name']) . '"');
                         header('Content-Transfer-Encoding: binary');
                         header('Expires: 0');
@@ -933,7 +937,7 @@ class responses extends Survey_Common_Action
             Yii::app()->setFlashMessage(gT("Sorry, this file was not found."),'error');
             $this->getController()->redirect(array("admin/responses","sa"=>"browse","surveyid"=>$surveyid));
         }
-        
+
     }
 
     /**
@@ -1088,10 +1092,6 @@ class responses extends Survey_Common_Action
             {
                 $limit = $dtcount;
             }
-
-            //NOW LETS SHOW THE DATA
-            if (Yii::app()->request->getPost('sql') && stripcslashes(Yii::app()->request->getPost('sql')) !== "" && Yii::app()->request->getPost('sql') != "NULL")
-                $oCriteria->addCondition(stripcslashes(Yii::app()->request->getPost('sql')));
 
             if (!is_null($tokenRequest)) {
                 $oCriteria->addCondition('t.token = ' . Yii::app()->db->quoteValue($tokenRequest));
