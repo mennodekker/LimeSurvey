@@ -212,6 +212,19 @@ class UploaderController extends SurveyController {
                         "success" => false,
                          "msg" => gT("We are sorry but there was a system error and your file was not saved. An email has been dispatched to notify the survey administrator.",'unescaped')
                     );
+                    // Now send the notice to survey admin
+                    $thissurvey = getSurveyInfo($surveyid);
+                    $email .= gT("Out of space to upload files.") . "\n"
+                           . $thissurvey['name'] . "\n";                           
+                    SendEmailMessage(
+                            $email, 
+                            gT("Error saving results","unescaped"), 
+                            $thissurvey['adminemail'], 
+                            $thissurvey['adminemail'], 
+                            Yii::app()->getConfig("sitename"), 
+                            false, 
+                            getBounceEmail($surveyid)
+                    );
                     //header('Content-Type: application/json');
                     echo ls_json_encode($return);
                     Yii::app()->end();

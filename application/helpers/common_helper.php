@@ -526,7 +526,7 @@ function convertGETtoPOST($url)
 * @returns integer Actual space used in MB
 */
 function calculateTotalFileUploadUsage(){
-    global $uploaddir;
+    $uploaddir = Yii::app()->getConfig('uploaddir');
     $sQuery='select sid from {{surveys}}';
     $oResult = dbExecuteAssoc($sQuery); //checked
     $aRows = $oResult->readAll();
